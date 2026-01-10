@@ -2,7 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options => {
     options.AddPolicy("GatewayCorsPolicy", policy => {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:50000")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -29,6 +29,5 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
 app.MapReverseProxy();
 app.Run();
