@@ -1,21 +1,28 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 
+// 1. Add Services
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(); // Built-in .NET 10 Generator
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseCors();
+
+// 2. Configure HTTP Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
 }
 
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
