@@ -1,3 +1,6 @@
+using YK.Infrastructure;
+using YK.Application;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options => {
@@ -9,7 +12,12 @@ builder.Services.AddCors(options => {
 
 // 1. Add Services
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi(); // Built-in .NET 10 Generator
+
+// Add Infrastructure services and pass the configuration
+builder.Services.AddApplication();
+builder.Services.AddPersistence(builder.Configuration);
 
 var app = builder.Build();
 

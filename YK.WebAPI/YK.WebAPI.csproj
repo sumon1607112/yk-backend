@@ -11,4 +11,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\YK.Application\YK.Application.csproj" />
+    <ProjectReference Include="..\YK.Infrastructure\YK.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
