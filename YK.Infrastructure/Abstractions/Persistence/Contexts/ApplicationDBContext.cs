@@ -1,27 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
-using YK.Domain.Entities.Users;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using YK.Domain.Entities.Account;
 
 namespace YK.Infrastructure.Abstractions.Persistence.Contexts
 {
-    // 1. You must declare the class here
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
-        // 2. Now the constructor is valid
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // 3. Define your Tables (DbSets)
-        public DbSet<User> Users { get; set; }
+        // No need for DbSet<User> — IdentityDbContext already provides it
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            // This automatically finds all classes implementing IEntityTypeConfiguration
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<User>().ToTable("User");
+            base.OnModelCreating(builder);
+
+            builder.Entity<User>(e => e.ToTable("User"));
+            builder.Entity<IdentityRole>(e => e.ToTable("Role"));
+            builder.Entity<IdentityUserRole<string>>(e => e.ToTable("UserRole"));
+            builder.Entity<IdentityUserClaim<string>>(e => e.ToTable("UserClaim"));
+            builder.Entity<IdentityUserLogin<string>>(e => e.ToTable("UserLogin"));
+            builder.Entity<IdentityUserToken<string>>(e => e.ToTable("UserToken"));
+            builder.Entity<IdentityRoleClaim<string>>(e => e.ToTable("RoleClaim"));
         }
     }
 }

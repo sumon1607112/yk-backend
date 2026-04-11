@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using YK.Application.Abstractions.Persistence;
-using YK.Domain.Entities.Users;
+using YK.Domain.Entities.Account;
 using YK.Infrastructure.Abstractions.Persistence.Contexts;
 using YK.Infrastructure.Common.Abstractions.Persistence;
 

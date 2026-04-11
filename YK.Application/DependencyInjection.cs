@@ -23,7 +23,7 @@ namespace YK.Application
             });
 
             // 2. AutoMapper Registration (Simplified with DI package)
-            services.AddAutoMapper(assembly); // One line!
+            services.AddAutoMapper(cfg => cfg.AddMaps(assembly)); // One line!
 
             // 3. Register FluentValidation
             services.AddValidatorsFromAssembly(assembly);

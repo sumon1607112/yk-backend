@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using YK.Application.UseCases.Users;
-using YK.Domain.Entities.Users;
-
+using YK.Domain.Entities.Account;
 
 namespace YK.Application.Mappings.Users
 {

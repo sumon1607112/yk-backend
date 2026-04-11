@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using YK.Application.Abstractions.Persistence;
-using YK.Domain.Entities.Users;
+using YK.Domain.Entities.Account;
 
 namespace YK.Application.UseCases.Users
 {

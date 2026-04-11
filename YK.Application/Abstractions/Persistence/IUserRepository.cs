@@ -1,5 +1,5 @@
 ﻿using YK.Application.Common.Abstractions.Persistence;
-using YK.Domain.Entities.Users;
+using YK.Domain.Entities.Account;
 
 namespace YK.Application.Abstractions.Persistence
 {
