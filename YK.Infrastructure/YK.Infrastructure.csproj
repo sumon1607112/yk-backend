@@ -21,4 +21,8 @@
     <ProjectReference Include="..\YK.Domain\YK.Domain.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
 </Project>
