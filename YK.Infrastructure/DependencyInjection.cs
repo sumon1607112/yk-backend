@@ -43,7 +43,10 @@ namespace YK.Infrastructure
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            // Repositories & Services
+            // Repositories
+
+
+            // Services
             services.AddScoped<IAccountService, AccountService>();
 
             return services;
