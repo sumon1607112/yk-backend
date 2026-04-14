@@ -14,9 +14,23 @@ namespace YK.Infrastructure
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
+            // Read Railway's DATABASE_URL or fallback to appsettings
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            string connectionString;
+
+            if (!string.IsNullOrEmpty(databaseUrl))
+            {
+                var uri = new Uri(databaseUrl);
+                connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
+            }
+            else
+            {
+                connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            }
+
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"),
+                options.UseNpgsql(
+                    connectionString,
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
             // Identity
