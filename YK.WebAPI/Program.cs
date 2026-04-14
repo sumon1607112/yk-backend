@@ -45,6 +45,13 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+// Fix: Handle Railway's HTTPS proxy
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                     | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+});
+
 app.UseCors();
 
 // Swagger available in ALL environments
