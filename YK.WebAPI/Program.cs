@@ -8,21 +8,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options => {
     options.AddDefaultPolicy(policy =>
-    policy.WithOrigins("http://localhost:50000")
-          .AllowAnyHeader()
-          .AllowAnyMethod());
+    policy.WithOrigins(
+        "http://localhost:50000",
+        "https://yk-backend-production.up.railway.app"  // Add Railway URL
+    )
+    .AllowAnyHeader()
+    .AllowAnyMethod());
 });
 
-// 1. Add Services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-// Add Application & Infrastructure
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 
-// Add JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -47,17 +47,14 @@ var app = builder.Build();
 
 app.UseCors();
 
-// 2. Configure HTTP Pipeline
-if (app.Environment.IsDevelopment())
+// Swagger available in ALL environments
+app.MapOpenApi();
+app.UseSwaggerUI(options =>
 {
-    app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "v1");
-    });
-}
+    options.SwaggerEndpoint("/openapi/v1.json", "v1");
+});
 
-app.UseAuthentication();  // Add this BEFORE Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
