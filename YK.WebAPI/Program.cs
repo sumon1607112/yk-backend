@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using YK.Application;
@@ -6,14 +7,12 @@ using YK.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options => {
+builder.Services.AddCors(options =>
+{
     options.AddDefaultPolicy(policy =>
-    policy.WithOrigins(
-        "http://localhost:50000",
-        "https://yk-backend-production.up.railway.app"  // Add Railway URL
-    )
-    .AllowAnyHeader()
-    .AllowAnyMethod());
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
 });
 
 builder.Services.AddControllers();
@@ -45,16 +44,20 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Fix: Handle Railway's HTTPS proxy
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
-                     | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
 app.UseCors();
 
-// Swagger available in ALL environments
+// Force HTTPS for Swagger
+app.Use(async (context, next) =>
+{
+    context.Request.Scheme = "https";
+    await next();
+});
+
 app.MapOpenApi();
 app.UseSwaggerUI(options =>
 {
