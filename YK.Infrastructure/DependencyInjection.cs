@@ -6,7 +6,6 @@ using YK.Application.Abstractions.Persistence;
 using YK.Application.Abstractions.Services;
 using YK.Domain.Entities.Account;
 using YK.Infrastructure.Abstractions.Persistence.Contexts;
-using YK.Infrastructure.Abstractions.Persistence.Repositories;
 using YK.Infrastructure.Abstractions.Services;
 
 namespace YK.Infrastructure
@@ -31,7 +30,6 @@ namespace YK.Infrastructure
             .AddDefaultTokenProviders();
 
             // Repositories & Services
-            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAccountService, AccountService>();
 
             return services;
