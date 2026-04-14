@@ -15,4 +15,8 @@
     <Project Path="YK.WebAPI/YK.WebAPI.csproj" Id="9c104c57-1267-481d-9cf8-36e45f0e7cd2" />
   </Folder>
   <Folder Name="/ServiceApplication/Product/" />
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path="Dockerfile" />
+  </Folder>
 </Solution>
