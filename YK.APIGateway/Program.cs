@@ -1,13 +1,16 @@
+using Microsoft.AspNetCore.HttpOverrides;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options => {
-    options.AddPolicy("GatewayCorsPolicy", policy => {
-        policy.WithOrigins("http://localhost:50000")
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("GatewayCorsPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
 });
-
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
@@ -16,18 +19,25 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 app.UseCors("GatewayCorsPolicy");
 
-if (app.Environment.IsDevelopment())
+// Force HTTPS for Swagger
+app.Use(async (context, next) =>
 {
-    app.MapOpenApi();
+    context.Request.Scheme = "https";
+    await next();
+});
 
-    app.UseSwaggerUI(options =>
-    {
-        // This goes through the regular auth-route
-        options.SwaggerEndpoint("/auth-api/openapi/v1.json", "Auth API");
-    });
-}
+app.MapOpenApi();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/auth-api/openapi/v1.json", "Auth API");
+});
 
 app.MapReverseProxy();
 app.Run();

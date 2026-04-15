@@ -12,14 +12,14 @@ RUN dotnet restore
 
 COPY . .
 
-RUN dotnet publish YK.WebAPI/YK.WebAPI.csproj -c Release -o /app/publish
+RUN dotnet publish YK.APIGateway/YK.APIGateway.csproj -c Release -o /app/gateway
+RUN dotnet publish YK.WebAPI/YK.WebAPI.csproj -c Release -o /app/webapi
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=build /app/gateway ./gateway
+COPY --from=build /app/webapi ./webapi
 
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Production
 
-ENTRYPOINT ["dotnet", "YK.WebAPI.dll"]
+CMD sh -c "dotnet /app/webapi/YK.WebAPI.dll --urls http://+:5001 & dotnet /app/gateway/YK.APIGateway.dll --urls http://+:8080"
