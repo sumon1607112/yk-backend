@@ -22,4 +22,4 @@ COPY --from=build /app/webapi ./webapi
 
 EXPOSE 8080
 
-CMD sh -c "dotnet /app/webapi/YK.WebAPI.dll --urls http://+:5001 & dotnet /app/gateway/YK.APIGateway.dll --urls http://+:8080"
+CMD sh -c "cd /app/webapi && dotnet YK.WebAPI.dll --urls http://+:5001 & sleep 5 && cd /app/gateway && dotnet YK.APIGateway.dll --urls http://+:8080"
