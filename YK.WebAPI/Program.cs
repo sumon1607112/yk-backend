@@ -53,13 +53,6 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseCors();
 
-// Force HTTPS for Swagger
-app.Use(async (context, next) =>
-{
-    context.Request.Scheme = "https";
-    await next();
-});
-
 app.MapOpenApi();
 app.UseSwaggerUI(options =>
 {
