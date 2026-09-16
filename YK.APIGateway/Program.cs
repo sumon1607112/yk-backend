@@ -21,23 +21,22 @@ var app = builder.Build();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto
 });
 
 app.UseCors("GatewayCorsPolicy");
 
-// Force HTTPS for Swagger
-app.Use(async (context, next) =>
-{
-    context.Request.Scheme = "https";
-    await next();
-});
-
 app.MapOpenApi();
+
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/auth-api/openapi/v1.json", "Auth API");
+    options.SwaggerEndpoint(
+        "/auth-api/openapi/v1.json",
+        "Auth API");
 });
 
 app.MapReverseProxy();
+
 app.Run();
