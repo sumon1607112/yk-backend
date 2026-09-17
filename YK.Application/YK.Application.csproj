@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Abstractions\Services\" />
     <Folder Include="Common\Exceptions\" />
     <Folder Include="UseCases\Account\Login\" />
   </ItemGroup>
