@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using YK.Application;
 using YK.Infrastructure;
 using YK.Infrastructure.Abstractions.Persistence.Contexts;
+using YK.WebAPI.Common.Extensions;
+using YK.WebAPI.Common.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,31 +17,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
-
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-    };
-});
+builder.Services.AddApiProblemDetails();
 
 var app = builder.Build();
 
@@ -51,8 +29,8 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
-
 app.MapOpenApi();
 app.UseSwaggerUI(options =>
 {

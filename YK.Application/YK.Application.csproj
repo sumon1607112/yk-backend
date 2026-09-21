@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Common\Contracts\User\" />
-    <Folder Include="Common\Exceptions\" />
+    <Folder Include="Common\Enums\" />
     <Folder Include="UseCases\Account\Login\" />
   </ItemGroup>
 
