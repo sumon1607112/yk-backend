@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Common\Contracts\User\" />
     <Folder Include="Common\Exceptions\" />
     <Folder Include="UseCases\Account\Login\" />
   </ItemGroup>
