@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using YK.Application.Abstractions.Services;
-using YK.Domain.Entities.Account;
+using YK.Domain.Entities.Common;
 
 namespace YK.Infrastructure.Abstractions.Services
 {
@@ -51,7 +51,7 @@ namespace YK.Infrastructure.Abstractions.Services
 
         public async Task<string> GenerateTokenAsync(string phone)
         {
-            var user =  await _userManager.FindByNameAsync(phone)?? throw new InvalidOperationException("User not found.");
+            var user = await _userManager.FindByNameAsync(phone) ?? throw new InvalidOperationException("User not found.");
             var roles = await _userManager.GetRolesAsync(user);
 
             var claims = new List<Claim>
@@ -62,7 +62,7 @@ namespace YK.Infrastructure.Abstractions.Services
 
             claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
-            var key = new SymmetricSecurityKey( Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],

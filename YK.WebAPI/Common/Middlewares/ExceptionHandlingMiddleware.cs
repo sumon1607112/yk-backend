@@ -22,7 +22,7 @@ namespace YK.WebAPI.Common.Middlewares
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Unhandled exception occurred. TraceId: {TraceId}",context.TraceIdentifier);
+                _logger.LogError(exception, "Unhandled exception occurred. TraceId: {TraceId}", context.TraceIdentifier);
 
                 await HandleExceptionAsync(
                     context,
@@ -38,15 +38,11 @@ namespace YK.WebAPI.Common.Middlewares
         {
             var problemDetails = exception switch
             {
-                ValidationException validationException =>
-                    CreateValidationProblem(
-                        context,
-                        validationException),
+                BusinessRuleException businessRuleException =>
+                    CreateBusinessRuleProblem(context, businessRuleException),
 
                 AppException appException =>
-                    CreateApplicationProblem(
-                        context,
-                        appException),
+                    CreateApplicationProblem(context, appException),
 
                 _ =>
                     CreateInternalServerProblem(context)
@@ -62,9 +58,7 @@ namespace YK.WebAPI.Common.Middlewares
                 });
         }
 
-        private static ProblemDetails CreateValidationProblem(
-            HttpContext context,
-            ValidationException exception)
+        private static ProblemDetails CreateBusinessRuleProblem(HttpContext context, BusinessRuleException exception)
         {
             var problemDetails = new ProblemDetails
             {
