@@ -31,10 +31,7 @@ namespace YK.WebAPI.Common.Middlewares
             }
         }
 
-        private static async Task HandleExceptionAsync(
-        HttpContext context,
-        IProblemDetailsService problemDetailsService,
-        Exception exception)
+        private static async Task HandleExceptionAsync(HttpContext context, IProblemDetailsService problemDetailsService, Exception exception)
         {
             var problemDetails = exception switch
             {
