@@ -2,18 +2,18 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY *.slnx ./
-COPY YK.APIGateway/*.csproj ./YK.APIGateway/
-COPY YK.Application/*.csproj ./YK.Application/
-COPY YK.Domain/*.csproj ./YK.Domain/
-COPY YK.Infrastructure/*.csproj ./YK.Infrastructure/
-COPY YK.WebAPI/*.csproj ./YK.WebAPI/
+COPY APIGateway/YK.APIGateway/*.csproj ./APIGateway/YK.APIGateway/
+COPY ServiceApplication/Auth/Core/YK.Application/*.csproj ./ServiceApplication/Auth/Core/YK.Application/
+COPY ServiceApplication/Auth/Core/YK.Domain/*.csproj ./ServiceApplication/Auth/Core/YK.Domain/
+COPY ServiceApplication/Auth/Infrastructure/YK.Infrastructure/*.csproj ./ServiceApplication/Auth/Infrastructure/YK.Infrastructure/
+COPY ServiceApplication/Auth/Presentation/YK.WebAPI/*.csproj ./ServiceApplication/Auth/Presentation/YK.WebAPI/
 
 RUN dotnet restore
 
 COPY . .
 
-RUN dotnet publish YK.APIGateway/YK.APIGateway.csproj -c Release -o /app/gateway
-RUN dotnet publish YK.WebAPI/YK.WebAPI.csproj -c Release -o /app/webapi
+RUN dotnet publish APIGateway/YK.APIGateway/YK.APIGateway.csproj -c Release -o /app/gateway
+RUN dotnet publish ServiceApplication/Auth/Presentation/YK.WebAPI/YK.WebAPI.csproj -c Release -o /app/webapi
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
