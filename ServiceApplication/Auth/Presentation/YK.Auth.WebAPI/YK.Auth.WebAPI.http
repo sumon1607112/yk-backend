@@ -1,0 +1,6 @@
+@YK.Auth.WebAPI_HostAddress = http://localhost:50001
+
+GET {{YK.Auth.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
