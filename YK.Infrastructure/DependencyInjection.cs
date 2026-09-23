@@ -2,11 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using YK.Application.Abstractions.Persistence;
-using YK.Application.Abstractions.Services;
-using YK.Domain.Entities.Account;
+using YK.Application.Common.Abstractions.Services.Identity;
+using YK.Domain.Entities.Common;
 using YK.Infrastructure.Abstractions.Persistence.Contexts;
-using YK.Infrastructure.Abstractions.Services;
+using YK.Infrastructure.Common.Abstractions.Services;
 
 namespace YK.Infrastructure
 {
@@ -41,7 +40,7 @@ namespace YK.Infrastructure
 
 
             // Services
-            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IIdentityService, IdentityService>();
 
             return services;
         }

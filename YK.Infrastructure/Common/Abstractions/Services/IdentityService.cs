@@ -6,7 +6,7 @@ using YK.Application.Common.Contracts.Identity;
 using YK.Domain.Entities.Common;
 using YK.Domain.Enums;
 
-namespace YK.Infrastructure.Common.Abstractions.Service
+namespace YK.Infrastructure.Common.Abstractions.Services
 {
     public class IdentityService : IIdentityService
     {

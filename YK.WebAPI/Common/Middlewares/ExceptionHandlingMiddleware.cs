@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using YK.Application.Common.Exceptions;
 
 namespace YK.WebAPI.Common.Middlewares
@@ -35,6 +36,8 @@ namespace YK.WebAPI.Common.Middlewares
         {
             var problemDetails = exception switch
             {
+                ValidationException validationException => CreateValidationProblem(context, validationException),
+
                 BusinessRuleException businessRuleException =>
                     CreateBusinessRuleProblem(context, businessRuleException),
 
@@ -53,6 +56,31 @@ namespace YK.WebAPI.Common.Middlewares
                     HttpContext = context,
                     ProblemDetails = problemDetails
                 });
+        }
+
+        private static ProblemDetails CreateValidationProblem(HttpContext context, FluentValidation.ValidationException exception)
+        {
+            var errors = exception.Errors
+                .GroupBy(x => x.PropertyName)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .Select(x => x.ErrorMessage)
+                        .Distinct()
+                        .ToArray());
+
+            var problemDetails = new ProblemDetails
+            {
+                Type = "validation-error",
+                Title = "Validation Failed",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = "One or more validation errors occurred.",
+                Instance = context.Request.Path
+            };
+
+            problemDetails.Extensions["errors"] = errors;
+
+            return problemDetails;
         }
 
         private static ProblemDetails CreateBusinessRuleProblem(HttpContext context, BusinessRuleException exception)

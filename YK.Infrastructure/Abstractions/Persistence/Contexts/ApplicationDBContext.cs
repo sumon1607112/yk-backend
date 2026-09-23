@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using YK.Domain.Entities.Account;
+using YK.Domain.Entities.Common;
 
 namespace YK.Infrastructure.Abstractions.Persistence.Contexts
 {

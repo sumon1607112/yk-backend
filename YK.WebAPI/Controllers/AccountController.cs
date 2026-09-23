@@ -16,11 +16,12 @@ namespace YK.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<RegisterResponseDto> Register(RegisterCommand command,CancellationToken cancellationToken)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<IActionResult> Register(RegisterCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command);
+            await _mediator.Send(command);
 
-            return result ?? new RegisterResponseDto();
+            return StatusCode(StatusCodes.Status201Created);
         }
     }
 }

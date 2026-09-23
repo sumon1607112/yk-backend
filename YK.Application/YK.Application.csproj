@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Abstractions\Services\" />
     <Folder Include="Common\Contracts\User\" />
     <Folder Include="Common\Enums\" />
     <Folder Include="UseCases\Account\Login\" />
