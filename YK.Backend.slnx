@@ -2,19 +2,19 @@
   <Folder Name="/APIGateway/">
     <Project Path="APIGateway/YK.APIGateway/YK.APIGateway.csproj" Id="b751810a-052e-4fde-946c-2de987eb8372" />
   </Folder>
-  <Folder Name="/ServiceApplication/" />
-  <Folder Name="/ServiceApplication/Auth/" />
-  <Folder Name="/ServiceApplication/Auth/Core/">
-    <Project Path="ServiceApplication/Auth/Core/YK.Auth.Application/YK.Auth.Application.csproj" Id="25a54a61-947d-4eaa-a892-9996cf8a1019" />
-    <Project Path="ServiceApplication/Auth/Core/YK.Auth.Domain/YK.Auth.Domain.csproj" Id="b2b9b0ed-e5b0-43ff-9317-71c8df8d02ad" />
+  <Folder Name="/ServiceApplications/" />
+  <Folder Name="/ServiceApplications/Auth/" />
+  <Folder Name="/ServiceApplications/Auth/Core/">
+    <Project Path="ServiceApplications/Auth/Core/YK.Auth.Application/YK.Auth.Application.csproj" Id="25a54a61-947d-4eaa-a892-9996cf8a1019" />
+    <Project Path="ServiceApplications/Auth/Core/YK.Auth.Domain/YK.Auth.Domain.csproj" Id="b2b9b0ed-e5b0-43ff-9317-71c8df8d02ad" />
   </Folder>
-  <Folder Name="/ServiceApplication/Auth/Infrastructure/">
-    <Project Path="ServiceApplication/Auth/Infrastructure/YK.Auth.Infrastructure/YK.Auth.Infrastructure.csproj" Id="9a7b5a93-c787-443c-bcd1-96c0cfc54fc7" />
+  <Folder Name="/ServiceApplications/Auth/Infrastructure/">
+    <Project Path="ServiceApplications/Auth/Infrastructure/YK.Auth.Infrastructure/YK.Auth.Infrastructure.csproj" Id="9a7b5a93-c787-443c-bcd1-96c0cfc54fc7" />
   </Folder>
-  <Folder Name="/ServiceApplication/Auth/Presentation/">
-    <Project Path="ServiceApplication/Auth/Presentation/YK.Auth.WebAPI/YK.Auth.WebAPI.csproj" Id="9c104c57-1267-481d-9cf8-36e45f0e7cd2" />
+  <Folder Name="/ServiceApplications/Auth/Presentation/">
+    <Project Path="ServiceApplications/Auth/Presentation/YK.Auth.WebAPI/YK.Auth.WebAPI.csproj" Id="9c104c57-1267-481d-9cf8-36e45f0e7cd2" />
   </Folder>
-  <Folder Name="/ServiceApplication/Product/" />
+  <Folder Name="/ServiceApplications/Product/" />
   <Folder Name="/Solution Items/">
     <File Path=".dockerignore" />
     <File Path="Dockerfile" />
