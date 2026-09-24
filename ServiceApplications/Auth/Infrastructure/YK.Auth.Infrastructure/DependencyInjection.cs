@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
-using YK.Auth.Domain.Entities.Common;
+using YK.Auth.Domain.Entities.Common.Identity;
 using YK.Auth.Infrastructure.Abstractions.Persistence.Contexts;
 using YK.Auth.Infrastructure.Common.Abstractions.Services;
 
@@ -41,6 +41,7 @@ namespace YK.Auth.Infrastructure
 
             // Services
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IRoleService, RoleService>();
 
             return services;
         }

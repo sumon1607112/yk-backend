@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="UseCases\Account\Login\**" />
+    <EmbeddedResource Remove="UseCases\Account\Login\**" />
+    <None Remove="UseCases\Account\Login\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\YK.Auth.Domain\YK.Auth.Domain.csproj" />
   </ItemGroup>
 
@@ -14,7 +20,6 @@
     <Folder Include="Abstractions\Services\" />
     <Folder Include="Common\Contracts\User\" />
     <Folder Include="Common\Enums\" />
-    <Folder Include="UseCases\Account\Login\" />
   </ItemGroup>
 
   <ItemGroup>

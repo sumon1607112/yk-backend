@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace YK.Auth.Domain.Enums
+﻿namespace YK.Auth.Domain.Enums
 {
-    public enum Role
+    public enum RoleEnum
     {
-        Admin = 1,
-        Seller = 2,
-        Buyer = 3
+        Admin,
+        Seller,
+        Buyer
     }
 }

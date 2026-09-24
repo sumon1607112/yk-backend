@@ -1,6 +1,6 @@
 ﻿using YK.Auth.Application.Common.Contracts.Identity;
 
-namespace YK.Auth.Application.UseCases.Account.Register
+namespace YK.Auth.Application.UseCases.Account.Commands.Register
 {
     public class RegisterRequestDto
     {

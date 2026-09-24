@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace YK.Auth.Application.UseCases.Account.Register
+namespace YK.Auth.Application.UseCases.Account.Commands.Register
 {
     public class RegisterValidator : AbstractValidator<RegisterCommand>
     {
@@ -23,8 +23,8 @@ namespace YK.Auth.Application.UseCases.Account.Register
                 .WithMessage("Password must be at least 8 characters.");
 
             RuleFor(x => x.RegisterRequest.CreateUserRequest.Role)
-                .IsInEnum()
-                .WithMessage("Invalid role.");
+                .NotEmpty()
+                .WithMessage("Role is required.");
         }
     }
 }

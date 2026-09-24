@@ -3,8 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
 using YK.Auth.Application.Common.Contracts.Identity;
-using YK.Auth.Domain.Entities.Common;
-using YK.Auth.Domain.Enums;
+using YK.Auth.Domain.Entities.Common.Identity;
 
 namespace YK.Auth.Infrastructure.Common.Abstractions.Services
 {
@@ -22,7 +21,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             _configuration = configuration;
         }
 
-        public async Task<bool> UserExistsAsync(string phone, Role role)
+        public async Task<bool> UserExistsAsync(string phone, string role)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phone);
 
@@ -31,7 +30,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
                 return false;
             }
 
-            return await _userManager.IsInRoleAsync(user, role.ToString());
+            return await _userManager.IsInRoleAsync(user, role);
         }
 
         public async Task<(bool Succeeded, IEnumerable<string> Errors)> CreateUserAsync(CreateUserRequest registerRequest)
@@ -50,7 +49,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
                 return (false, userResult.Errors.Select(x => x.Description));
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, registerRequest.Role.ToString());
+            var roleResult = await _userManager.AddToRoleAsync(user, registerRequest.Role);
 
             if (!roleResult.Succeeded)
             {
