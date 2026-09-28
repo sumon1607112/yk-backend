@@ -12,8 +12,7 @@ namespace YK.Auth.Application.UseCases.Role.Commands.CreateRole
                 .MaximumLength(50)
                 .WithMessage("Role name cannot exceed 50 characters.")
                 .Matches("^[a-zA-Z0-9]+$")
-                .WithMessage(
-                    "Role name can contain only letters and numbers.");
+                .WithMessage("Role name can contain only letters and numbers.");
         }
     }
 }
