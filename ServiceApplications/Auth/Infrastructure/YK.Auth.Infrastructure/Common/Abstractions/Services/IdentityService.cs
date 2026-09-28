@@ -37,7 +37,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
         {
             var user = new User
             {
-                UserName = registerRequest.Phone,
+                UserName = Guid.NewGuid().ToString(),
                 PhoneNumber = registerRequest.Phone,
                 Email = registerRequest.Email
             };
