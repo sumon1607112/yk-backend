@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using YK.Auth.Application.UseCases.Account.Commands.Login;
 using YK.Auth.Application.UseCases.Account.Commands.Register;
 
 namespace YK.Auth.WebAPI.Controllers
@@ -22,6 +23,14 @@ namespace YK.Auth.WebAPI.Controllers
             await _mediator.Send(command, cancellationToken);
 
             return StatusCode(StatusCodes.Status201Created);
+        }
+
+        [HttpPost]
+        public async Task<LoginResponseDto> Login(LoginCommand command, CancellationToken cancellationToken)
+        {
+            var response = await _mediator.Send(command, cancellationToken);
+
+            return response;
         }
     }
 }

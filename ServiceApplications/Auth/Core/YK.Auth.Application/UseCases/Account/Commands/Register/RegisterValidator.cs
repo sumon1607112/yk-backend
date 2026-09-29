@@ -6,23 +6,23 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Register
     {
         public RegisterValidator()
         {
-            RuleFor(x => x.RegisterRequest.CreateUserRequest.Phone)
+            RuleFor(x => x.registerRequest.CreateUserRequest.Phone)
                 .NotEmpty()
                 .WithMessage("Phone number is required.");
 
-            RuleFor(x => x.RegisterRequest.CreateUserRequest.Email)
+            RuleFor(x => x.registerRequest.CreateUserRequest.Email)
                 .EmailAddress()
                 .When(x => !string.IsNullOrWhiteSpace(
-                    x.RegisterRequest.CreateUserRequest.Email))
+                    x.registerRequest.CreateUserRequest.Email))
                 .WithMessage("Email address is invalid.");
 
-            RuleFor(x => x.RegisterRequest.CreateUserRequest.Password)
+            RuleFor(x => x.registerRequest.CreateUserRequest.Password)
                 .NotEmpty()
                 .WithMessage("Password is required.")
                 .MinimumLength(8)
                 .WithMessage("Password must be at least 8 characters.");
 
-            RuleFor(x => x.RegisterRequest.CreateUserRequest.Role)
+            RuleFor(x => x.registerRequest.CreateUserRequest.Role)
                 .NotEmpty()
                 .WithMessage("Role is required.");
         }

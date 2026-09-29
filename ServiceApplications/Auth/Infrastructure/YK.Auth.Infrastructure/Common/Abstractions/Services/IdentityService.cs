@@ -1,24 +1,21 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
 using YK.Auth.Application.Common.Contracts.Identity;
 using YK.Auth.Domain.Entities.Common.Identity;
+using YK.Auth.Infrastructure.Abstractions.Persistence.Contexts;
 
 namespace YK.Auth.Infrastructure.Common.Abstractions.Services
 {
     public class IdentityService : IIdentityService
     {
-
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IConfiguration _configuration;
 
-        public IdentityService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public IdentityService(UserManager<User> userManager, ApplicationDbContext context)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
-            _configuration = configuration;
+            _context = context;
         }
 
         public async Task<bool> UserExistsAsync(string phone, string role)
@@ -61,9 +58,25 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             return (true, []);
         }
 
-        public async Task<bool> ValidateCredentialsAsync(string phone, string password)
+        public async Task<IdentityUser?> ValidateCredentialsAsync(string phone, string role, string password)
         {
-            throw new NotImplementedException();
+            var normalizedRole = _userManager.NormalizeName(role);
+
+            var users = await (
+                from u in _context.Users
+                join ur in _context.UserRoles on u.Id equals ur.UserId
+                join r in _context.Roles on ur.RoleId equals r.Id
+                where u.PhoneNumber == phone && r.NormalizedName == normalizedRole
+                select u
+            ).ToListAsync();
+
+            foreach (var user in users)
+            {
+                if (await _userManager.CheckPasswordAsync(user, password))
+                    return user;
+            }
+
+            return null;
         }
     }
 }

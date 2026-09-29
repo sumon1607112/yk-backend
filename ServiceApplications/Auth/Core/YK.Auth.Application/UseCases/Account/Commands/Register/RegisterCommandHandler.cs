@@ -17,7 +17,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Register
 
         public async Task Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
-            var createUserRequest = request.RegisterRequest.CreateUserRequest;
+            var createUserRequest = request.registerRequest.CreateUserRequest;
 
             var userExist = await _identityService.UserExistsAsync(createUserRequest.Phone, createUserRequest.Role);
             var roleExist = await _roleService.RoleExistsAsync(createUserRequest.Role);
