@@ -5,6 +5,7 @@ using YK.Auth.Infrastructure;
 using YK.Auth.Infrastructure.Abstractions.Persistence.Contexts;
 using YK.Auth.WebAPI.Common.Extensions;
 using YK.Auth.WebAPI.Common.Middlewares;
+using YK.Auth.WebAPI.Common.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +18,14 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApiProblemDetails();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-
 
 var app = builder.Build();
 

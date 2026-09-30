@@ -41,11 +41,17 @@ namespace YK.Auth.WebAPI.Common.Extensions
                     throw new NotSupportedException($"Signing algorithm '{signingAlgorithm}' is not supported.");
             }
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(options =>
-                    {
-                        options.TokenValidationParameters = tokenValidationParameters;
-                    });
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+             .AddJwtBearer(options =>
+             {
+                 options.MapInboundClaims = false;
+                 options.TokenValidationParameters = tokenValidationParameters;
+             });
 
             return services;
         }

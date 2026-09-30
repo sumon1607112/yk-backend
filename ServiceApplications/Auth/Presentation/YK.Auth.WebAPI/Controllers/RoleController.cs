@@ -1,11 +1,13 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YK.Auth.Application.UseCases.Role.Commands.CreateRole;
 
 namespace YK.Auth.WebAPI.Controllers
 {
-    [Route("api/Roles")]
+    [Authorize]
     [ApiController]
+    [Route("api/Roles")]
     public class RoleController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -15,7 +17,9 @@ namespace YK.Auth.WebAPI.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> Create(CreateRoleRequestDto request, CancellationToken cancellationToken)
         {
