@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
-using YK.Auth.Application.Common.Contracts.Authentication;
+﻿using YK.Auth.Application.Common.Contracts.Authentication;
+using YK.Auth.Domain.Entities.Common.Identity;
 
 namespace YK.Auth.Application.Common.Abstractions.Services.Identity
 {
     public interface ITokenService
     {
-        Task<AuthTokensDto> GenerateTokensAsync(IdentityUser user);
+        Task<AuthTokensDto> GenerateTokensAsync(User user);
     }
 }

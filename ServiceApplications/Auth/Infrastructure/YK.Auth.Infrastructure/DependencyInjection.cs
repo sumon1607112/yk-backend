@@ -42,6 +42,7 @@ namespace YK.Auth.Infrastructure
             // Services
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<ITokenService, TokenService>();
 
             return services;
         }

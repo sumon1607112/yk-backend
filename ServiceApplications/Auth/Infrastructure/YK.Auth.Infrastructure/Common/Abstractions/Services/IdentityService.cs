@@ -58,7 +58,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             return (true, []);
         }
 
-        public async Task<IdentityUser?> ValidateCredentialsAsync(string phone, string role, string password)
+        public async Task<User?> ValidateCredentialsAsync(string phone, string role, string password)
         {
             var normalizedRole = _userManager.NormalizeName(role);
 

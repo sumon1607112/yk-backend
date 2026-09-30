@@ -8,7 +8,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Login
         private readonly IIdentityService _identityService;
         private readonly ITokenService _tokenService;
 
-        public LoginCommandHandler(IIdentityService identityService, ITokenService tokenService, CancellationToken cancellationToken)
+        public LoginCommandHandler(IIdentityService identityService, ITokenService tokenService)
         {
             _identityService = identityService;
             _tokenService = tokenService;

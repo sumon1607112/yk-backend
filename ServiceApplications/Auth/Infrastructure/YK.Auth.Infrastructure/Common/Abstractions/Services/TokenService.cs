@@ -7,19 +7,22 @@ using System.Security.Cryptography;
 using System.Text;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
 using YK.Auth.Application.Common.Contracts.Authentication;
+using YK.Auth.Domain.Entities.Common.Identity;
 
 namespace YK.Auth.Infrastructure.Common.Abstractions.Services
 {
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
+        private readonly UserManager<User> _userManager;
 
-        public TokenService(IConfiguration configuration)
+        public TokenService(IConfiguration configuration, UserManager<User> userManager)
         {
             _configuration = configuration;
+            _userManager = userManager;
         }
 
-        public async Task<AuthTokensDto> GenerateTokensAsync(IdentityUser user)
+        public async Task<AuthTokensDto> GenerateTokensAsync(User user)
         {
             var signingAlgorithm = _configuration["Jwt:SigningAlgorithm"];
 
@@ -34,16 +37,16 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             };
         }
 
-        private async Task<AuthTokensDto> GenerateHs256TokensAsync(IdentityUser user)
+        private async Task<AuthTokensDto> GenerateHs256TokensAsync(User user)
         {
-            var secretKey = _configuration["Jwt:SecretKey"];
+            var secretKey = _configuration["Jwt:Hs256:SecretKey"];
 
             if (string.IsNullOrWhiteSpace(secretKey))
             {
                 throw new InvalidOperationException("JWT secret key is not configured.");
             }
 
-            var claims = CreateClaims(user);
+            var claims = await CreateClaims(user);
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = CreateToken(claims, credentials);
@@ -56,9 +59,9 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             };
         }
 
-        private async Task<AuthTokensDto> GenerateRs256TokensAsync(IdentityUser user)
+        private async Task<AuthTokensDto> GenerateRs256TokensAsync(User user)
         {
-            var privateKey = _configuration["Jwt:PrivateKey"];
+            var privateKey = _configuration["Jwt:Rs256:PrivateKey"];
 
             if (string.IsNullOrWhiteSpace(privateKey))
             {
@@ -70,7 +73,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
 
             var securityKey = new RsaSecurityKey(rsa);
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
-            var claims = CreateClaims(user);
+            var claims = await CreateClaims(user);
             var token = CreateToken(claims, credentials);
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
@@ -81,16 +84,25 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             };
         }
 
-        private List<Claim> CreateClaims(IdentityUser user)
+        private async Task<List<Claim>> CreateClaims(User user)
         {
-            return new List<Claim>
-        {
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+            var claims = new List<Claim>
+            {
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim("role", role));
+            }
+
+            return claims;
         }
 
-        private JwtSecurityToken CreateToken(IEnumerable<Claim> claims, SigningCredentials credentials)
+        private JwtSecurityToken CreateToken(List<Claim> claims, SigningCredentials credentials)
         {
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];

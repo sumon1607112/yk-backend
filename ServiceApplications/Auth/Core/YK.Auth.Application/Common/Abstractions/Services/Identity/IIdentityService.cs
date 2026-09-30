@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using YK.Auth.Application.Common.Contracts.Identity;
+﻿using YK.Auth.Application.Common.Contracts.Identity;
+using YK.Auth.Domain.Entities.Common.Identity;
 
 namespace YK.Auth.Application.Common.Abstractions.Services.Identity
 {
@@ -9,6 +9,6 @@ namespace YK.Auth.Application.Common.Abstractions.Services.Identity
 
         Task<(bool Succeeded, IEnumerable<string> Errors)> CreateUserAsync(CreateUserRequest registerRequest);
 
-        Task<IdentityUser?> ValidateCredentialsAsync(string phone, string role, string password);
+        Task<User?> ValidateCredentialsAsync(string phone, string role, string password);
     }
 }

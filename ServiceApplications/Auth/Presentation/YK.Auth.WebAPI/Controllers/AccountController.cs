@@ -16,7 +16,7 @@ namespace YK.Auth.WebAPI.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
+        [HttpPost("Register")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> Register(RegisterCommand command, CancellationToken cancellationToken)
         {
@@ -25,7 +25,7 @@ namespace YK.Auth.WebAPI.Controllers
             return StatusCode(StatusCodes.Status201Created);
         }
 
-        [HttpPost]
+        [HttpPost("Login")]
         public async Task<LoginResponseDto> Login(LoginCommand command, CancellationToken cancellationToken)
         {
             var response = await _mediator.Send(command, cancellationToken);

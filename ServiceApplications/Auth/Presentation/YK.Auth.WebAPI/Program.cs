@@ -21,6 +21,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApiProblemDetails();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
 
 var app = builder.Build();
 
