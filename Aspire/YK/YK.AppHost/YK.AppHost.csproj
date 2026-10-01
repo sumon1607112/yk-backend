@@ -1,0 +1,17 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>9b9d7629-6ac6-4bf0-b46d-a6cc7fe5d2ae</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\APIGateway\YK.APIGateway\YK.APIGateway.csproj" />
+    <ProjectReference Include="..\..\..\ServiceApplications\Auth\Presentation\YK.Auth.WebAPI\YK.Auth.WebAPI.csproj" />
+  </ItemGroup>
+
+</Project>

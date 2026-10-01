@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults();
 
 builder.Services.AddCors(options =>
 {
@@ -26,10 +27,10 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
         ForwardedHeaders.XForwardedProto
 });
 
+
+app.MapDefaultEndpoints();
 app.UseCors("GatewayCorsPolicy");
-
 app.MapOpenApi();
-
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint(

@@ -21,6 +21,10 @@ namespace YK.Auth.WebAPI.Common.Middlewares
             {
                 await _next(context);
             }
+            catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+            {
+                // Client disconnected: nothing to return, not an error
+            }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Unhandled exception occurred. TraceId: {TraceId}", context.TraceIdentifier);

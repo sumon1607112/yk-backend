@@ -2,6 +2,10 @@
   <Folder Name="/APIGateway/">
     <Project Path="APIGateway/YK.APIGateway/YK.APIGateway.csproj" Id="b751810a-052e-4fde-946c-2de987eb8372" />
   </Folder>
+  <Folder Name="/Aspire/">
+    <Project Path="Aspire/YK/YK.AppHost/YK.AppHost.csproj" Id="a1a48961-db42-4523-835d-f441f5a05d69" />
+    <Project Path="Aspire/YK/YK.ServiceDefaults/YK.ServiceDefaults.csproj" />
+  </Folder>
   <Folder Name="/ServiceApplications/" />
   <Folder Name="/ServiceApplications/Auth/" />
   <Folder Name="/ServiceApplications/Auth/Core/">

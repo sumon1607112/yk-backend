@@ -8,6 +8,7 @@ using YK.Auth.WebAPI.Common.Middlewares;
 using YK.Auth.WebAPI.Common.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults();
 
 builder.Services.AddCors(options =>
 {
@@ -34,6 +35,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.All
 });
 
+app.MapDefaultEndpoints();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
 app.MapOpenApi();

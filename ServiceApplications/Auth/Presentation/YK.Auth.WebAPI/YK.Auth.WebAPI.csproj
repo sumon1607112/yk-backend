@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Aspire\YK\YK.ServiceDefaults\YK.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\Core\YK.Auth.Application\YK.Auth.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\YK.Auth.Infrastructure\YK.Auth.Infrastructure.csproj" />
   </ItemGroup>
