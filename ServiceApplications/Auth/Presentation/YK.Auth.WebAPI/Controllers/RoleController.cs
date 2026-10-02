@@ -5,7 +5,7 @@ using YK.Auth.Application.UseCases.Role.Commands.CreateRole;
 
 namespace YK.Auth.WebAPI.Controllers
 {
-    [Authorize]
+   // [Authorize]
     [ApiController]
     [Route("api/Roles")]
     public class RoleController : ControllerBase
@@ -18,7 +18,7 @@ namespace YK.Auth.WebAPI.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> Create(CreateRoleRequestDto request, CancellationToken cancellationToken)

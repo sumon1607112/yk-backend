@@ -108,7 +108,6 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
 
         private static string Hash(string token) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
-
         private async Task<string> CreateAccessTokenAsync(User user)
         {
             var claims = await CreateClaims(user);
@@ -123,6 +122,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
                             throw new InvalidOperationException("JWT secret key is not configured.");
 
                         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
                         return WriteToken(claims, new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
                     }
                 case "RS256":
@@ -162,6 +162,7 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
         {
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
+
             if (string.IsNullOrWhiteSpace(issuer)) throw new InvalidOperationException("JWT issuer is not configured.");
             if (string.IsNullOrWhiteSpace(audience)) throw new InvalidOperationException("JWT audience is not configured.");
 

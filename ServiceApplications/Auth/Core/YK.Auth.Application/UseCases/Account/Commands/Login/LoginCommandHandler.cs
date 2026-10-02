@@ -23,6 +23,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Login
             }
 
             var tokens = await _tokenService.GenerateTokensAsync(user);
+
             return new LoginResponseDto
             {
                 Tokens = tokens

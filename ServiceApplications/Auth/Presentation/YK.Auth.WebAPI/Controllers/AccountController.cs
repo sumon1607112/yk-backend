@@ -1,6 +1,9 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YK.Auth.Application.Common.Contracts.Authentication;
 using YK.Auth.Application.UseCases.Account.Commands.Login;
+using YK.Auth.Application.UseCases.Account.Commands.RefreshToken;
 using YK.Auth.Application.UseCases.Account.Commands.Register;
 
 namespace YK.Auth.WebAPI.Controllers
@@ -31,6 +34,15 @@ namespace YK.Auth.WebAPI.Controllers
             var response = await _mediator.Send(command, cancellationToken);
 
             return response;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Refresh")]
+        public async Task<AuthTokensDto> Refresh(RefreshTokenCommand command, CancellationToken ct)
+        {
+            var result = await _mediator.Send(command, ct);
+
+            return result;
         }
     }
 }
