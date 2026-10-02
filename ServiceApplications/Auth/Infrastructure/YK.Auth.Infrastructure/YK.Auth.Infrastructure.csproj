@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Abstractions\Persistence\Configurations\" />
-    <Folder Include="Abstractions\Persistence\Repositories\" />
+    <Compile Remove="Abstractions\Persistence\Repositories\**" />
+    <EmbeddedResource Remove="Abstractions\Persistence\Repositories\**" />
+    <None Remove="Abstractions\Persistence\Repositories\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Abstractions\Services\" />
   </ItemGroup>
 

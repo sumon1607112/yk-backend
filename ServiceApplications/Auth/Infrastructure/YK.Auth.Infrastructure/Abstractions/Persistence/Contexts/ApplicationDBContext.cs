@@ -12,14 +12,13 @@ namespace YK.Auth.Infrastructure.Abstractions.Persistence.Contexts
         {
         }
 
-        // No need for DbSet<User> — IdentityDbContext already provides it
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-
             base.OnModelCreating(builder);
 
+            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
             builder.Entity<User>(e => e.ToTable("User"));
             builder.Entity<IdentityRole>(e => e.ToTable("Role"));
             builder.Entity<IdentityUserRole<string>>(e => e.ToTable("UserRole"));

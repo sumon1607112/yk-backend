@@ -5,6 +5,8 @@ namespace YK.Auth.Application.Common.Abstractions.Services.Identity
 {
     public interface ITokenService
     {
-        Task<AuthTokensDto> GenerateTokensAsync(User user);
+        Task<AuthTokensDto> GenerateTokensAsync(User user, CancellationToken ct = default);
+        Task<AuthTokensDto> RefreshTokensAsync(string refreshToken, CancellationToken ct = default);
+        Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken ct = default);
     }
 }
