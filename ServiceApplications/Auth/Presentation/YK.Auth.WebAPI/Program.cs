@@ -49,10 +49,32 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Auto-apply migrations on startup
+// Auto-apply migrations on startup (don't crash the app if the DB is paused)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    const int maxAttempts = 6;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            db.Database.Migrate();
+            logger.LogInformation("Database migration applied successfully.");
+            break;
+        }
+        catch (Exception ex) when (attempt < maxAttempts)
+        {
+            logger.LogWarning(ex, "Database not ready (attempt {Attempt}/{Max}). Retrying in 10s...", attempt, maxAttempts);
+            Thread.Sleep(TimeSpan.FromSeconds(10));
+        }
+        catch (Exception ex)
+        {
+            // Last attempt failed: log it and let the app start anyway
+            logger.LogError(ex, "Database migration failed after {Max} attempts.", maxAttempts);
+        }
+    }
 }
 
 app.Run();
