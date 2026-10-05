@@ -29,10 +29,7 @@ namespace YK.Auth.WebAPI.Common.Middlewares
             {
                 _logger.LogError(exception, "Unhandled exception occurred. TraceId: {TraceId}", context.TraceIdentifier);
 
-                await HandleExceptionAsync(
-                    context,
-                    problemDetailsService,
-                    exception);
+                await HandleExceptionAsync(context, problemDetailsService, exception);
             }
         }
 

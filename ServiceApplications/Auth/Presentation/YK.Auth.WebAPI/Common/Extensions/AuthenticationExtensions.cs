@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Text;
@@ -45,6 +46,27 @@ namespace YK.Auth.WebAPI.Common.Extensions
                     {
                         options.MapInboundClaims = false;
                         options.TokenValidationParameters = tokenValidationParameters;
+
+                        options.Events = new JwtBearerEvents
+                        {
+                            // 401: no token, invalid token, or expired token
+                            OnChallenge = async context =>
+                            {
+                                context.HandleResponse(); // stop the default empty 401
+
+                                var detail = context.AuthenticateFailure switch
+                                {
+                                    SecurityTokenExpiredException => "Access token has expired.",
+                                    null => "Authentication is required to access this resource.",
+                                    _ => "Access token is invalid."
+                                };
+
+                                await WriteProblemAsync(context.HttpContext, StatusCodes.Status401Unauthorized, "unauthorized", "Unauthorized", detail);
+                            },
+
+                            // 403: valid token, but the user lacks the required role
+                            OnForbidden = context => WriteProblemAsync(context.HttpContext, StatusCodes.Status403Forbidden, "forbidden", "Forbidden", "You do not have permission to perform this action.")
+                        };
                     });
 
             return services;
@@ -66,6 +88,27 @@ namespace YK.Auth.WebAPI.Common.Extensions
             rsa.ImportFromPem(publicKey);
 
             parameters.IssuerSigningKey = new RsaSecurityKey(rsa);
+        }
+
+        // Writes 401/403 in the same ProblemDetails format as ExceptionHandlingMiddleware
+        private static async Task WriteProblemAsync(HttpContext httpContext, int status, string type, string title, string detail)
+        {
+            httpContext.Response.StatusCode = status;
+
+            var problemDetailsService = httpContext.RequestServices.GetRequiredService<IProblemDetailsService>();
+
+            await problemDetailsService.WriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = httpContext,
+                ProblemDetails = new ProblemDetails
+                {
+                    Type = type,
+                    Title = title,
+                    Status = status,
+                    Detail = detail,
+                    Instance = httpContext.Request.Path
+                }
+            });
         }
 
         // Fails at startup if the value is missing OR empty (e.g. "" in appsettings.json)
