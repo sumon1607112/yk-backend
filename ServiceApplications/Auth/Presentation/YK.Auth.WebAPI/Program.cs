@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using YK.Auth.Application;
 using YK.Auth.Infrastructure;
 using YK.Auth.Infrastructure.Abstractions.Persistence.Contexts;
+using YK.Auth.Infrastructure.Abstractions.Persistence.Seeds;
 using YK.Auth.WebAPI.Common.Extensions;
 using YK.Auth.WebAPI.Common.Middlewares;
 using YK.Auth.WebAPI.Common.OpenApi;
@@ -48,8 +49,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Auto-apply migrations on startup
-// Auto-apply migrations on startup (don't crash the app if the DB is paused)
+// NEW: apply migrations and seed roles/admin on startup (retry if the DB is still waking up)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -60,21 +60,21 @@ using (var scope = app.Services.CreateScope())
     {
         try
         {
-            db.Database.Migrate();
-            logger.LogInformation("Database migration applied successfully.");
+            await db.Database.MigrateAsync();
+            await IdentitySeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+            logger.LogInformation("Database migrated and seeded.");
             break;
         }
         catch (Exception ex) when (attempt < maxAttempts)
         {
             logger.LogWarning(ex, "Database not ready (attempt {Attempt}/{Max}). Retrying in 10s...", attempt, maxAttempts);
-            Thread.Sleep(TimeSpan.FromSeconds(10));
+            await Task.Delay(TimeSpan.FromSeconds(10));
         }
         catch (Exception ex)
         {
-            // Last attempt failed: log it and let the app start anyway
-            logger.LogError(ex, "Database migration failed after {Max} attempts.", maxAttempts);
+            logger.LogError(ex, "Database migration/seed failed after {Max} attempts.", maxAttempts);
         }
     }
 }
 
-app.Run();
+await app.RunAsync();

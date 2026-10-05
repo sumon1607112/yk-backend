@@ -13,9 +13,9 @@ namespace YK.Auth.Application.UseCases.Role.Commands.CreateRole
             _roleService = roleService;
         }
 
-        public async Task Handle(CreateRoleCommand request, CancellationToken cancellationToken)
+        public async Task Handle(CreateRoleCommand command, CancellationToken cancellationToken)
         {
-            var roleName = request.Request.Name.Trim();
+            var roleName = command.CreateRoleRequest.Name.Trim();
 
             var exists = await _roleService.RoleExistsAsync(roleName);
 

@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YK.Auth.Application.UseCases.Role.Commands.CreateRole;
+using YK.Auth.Domain.Enums;
 
 namespace YK.Auth.WebAPI.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/Roles")]
     public class RoleController : ControllerBase
@@ -18,12 +19,12 @@ namespace YK.Auth.WebAPI.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = nameof(RoleEnum.Admin))]
         [HttpPost("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> Create(CreateRoleRequestDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create(CreateRoleCommand command, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new CreateRoleCommand(request), cancellationToken);
+            await _mediator.Send(new CreateRoleCommand(command.CreateRoleRequest), cancellationToken);
 
             return StatusCode(StatusCodes.Status201Created);
         }

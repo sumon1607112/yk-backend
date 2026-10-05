@@ -6,7 +6,7 @@ namespace YK.Auth.Application.UseCases.Role.Commands.CreateRole
     {
         public CreateRoleValidator()
         {
-            RuleFor(x => x.Request.Name)
+            RuleFor(x => x.CreateRoleRequest.Name)
                 .NotEmpty()
                 .WithMessage("Role name is required.")
                 .MaximumLength(50)

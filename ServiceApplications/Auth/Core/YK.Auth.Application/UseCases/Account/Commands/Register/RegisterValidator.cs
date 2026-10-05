@@ -1,9 +1,16 @@
 ﻿using FluentValidation;
+using YK.Auth.Domain.Enums;
 
 namespace YK.Auth.Application.UseCases.Account.Commands.Register
 {
     public class RegisterValidator : AbstractValidator<RegisterCommand>
     {
+        private static readonly string[] SelfRegisterRoles =
+        [
+            nameof(RoleEnum.Buyer),
+            nameof(RoleEnum.Seller)
+        ];
+
         public RegisterValidator()
         {
             RuleFor(x => x.registerRequest.CreateUserRequest.Phone)
@@ -24,7 +31,9 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Register
 
             RuleFor(x => x.registerRequest.CreateUserRequest.Role)
                 .NotEmpty()
-                .WithMessage("Role is required.");
+                .WithMessage("Role is required.")
+                .Must(role => SelfRegisterRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
+                .WithMessage("Role must be Buyer or Seller.");
         }
     }
 }
