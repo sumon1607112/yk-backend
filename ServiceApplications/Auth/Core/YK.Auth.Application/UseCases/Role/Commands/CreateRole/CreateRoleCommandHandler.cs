@@ -28,7 +28,7 @@ namespace YK.Auth.Application.UseCases.Role.Commands.CreateRole
 
             if (!result.Succeeded)
             {
-                throw new ApplicationException(string.Join("; ", result.Errors.Select(x => x.Description)));
+                throw new BusinessRuleException(result.Errors.Select(x => x.Description));
             }
         }
     }

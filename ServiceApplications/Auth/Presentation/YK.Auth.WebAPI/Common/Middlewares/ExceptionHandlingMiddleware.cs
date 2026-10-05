@@ -38,15 +38,10 @@ namespace YK.Auth.WebAPI.Common.Middlewares
             var problemDetails = exception switch
             {
                 ValidationException validationException => CreateValidationProblem(context, validationException),
+                BusinessRuleException businessRuleException => CreateBusinessRuleProblem(context, businessRuleException),
+                AppException appException => CreateApplicationProblem(context, appException),
 
-                BusinessRuleException businessRuleException =>
-                    CreateBusinessRuleProblem(context, businessRuleException),
-
-                AppException appException =>
-                    CreateApplicationProblem(context, appException),
-
-                _ =>
-                    CreateInternalServerProblem(context)
+                _ => CreateInternalServerProblem(context)
             };
 
             context.Response.StatusCode = problemDetails.Status!.Value;
