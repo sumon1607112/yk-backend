@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
+using YK.Auth.Application.Common.Exceptions;
 
 namespace YK.Auth.Application.UseCases.Account.Commands.Login
 {
@@ -19,7 +20,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Login
             var user = await _identityService.ValidateCredentialsAsync(request.loginRequest.Phone, request.loginRequest.Role, request.loginRequest.Password);
             if (user == null)
             {
-                throw new Exception("User not found");
+                throw new UnauthorizedException("Invalid phone, role, or password.");
             }
 
             var tokens = await _tokenService.GenerateTokensAsync(user);
