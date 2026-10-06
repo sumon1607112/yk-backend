@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YK.Auth.Application.Common.Contracts.Authentication;
 using YK.Auth.Application.UseCases.Account.Commands.Login;
+using YK.Auth.Application.UseCases.Account.Commands.Logout;
 using YK.Auth.Application.UseCases.Account.Commands.RefreshToken;
 using YK.Auth.Application.UseCases.Account.Commands.Register;
 
@@ -34,6 +35,16 @@ namespace YK.Auth.WebAPI.Controllers
             var response = await _mediator.Send(command, cancellationToken);
 
             return response;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Logout")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> Logout(LogoutCommand command, CancellationToken ct)
+        {
+            await _mediator.Send(command, ct);
+
+            return NoContent();
         }
 
         [AllowAnonymous]

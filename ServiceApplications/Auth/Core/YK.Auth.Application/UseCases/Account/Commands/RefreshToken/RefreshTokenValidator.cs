@@ -1,15 +1,12 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace YK.Auth.Application.UseCases.Account.Commands.RefreshToken
 {
-    public class RefreshTokenValidator : AbstractValidator<RefreshTokenRequestDto>
+    public class RefreshTokenValidator : AbstractValidator<RefreshTokenCommand>
     {
         public RefreshTokenValidator()
         {
-            RuleFor(x => x.RefreshToken)
+            RuleFor(x => x.refreshTokenRequest.RefreshToken)
                 .NotEmpty()
                 .WithMessage("Refresh token is required.");
         }
