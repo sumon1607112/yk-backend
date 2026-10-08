@@ -17,7 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Abstractions\Persistence\" />
     <Folder Include="Abstractions\Services\" />
+    <Folder Include="Common\Abstractions\Persistence\" />
     <Folder Include="Common\Contracts\User\" />
   </ItemGroup>
 

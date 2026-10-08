@@ -1,6 +1,6 @@
 # YK.Backend
 
-Microservice backend built with **.NET 10**, featuring a YARP API Gateway and a JWT-based Auth service following **Clean Architecture** and **CQRS**.
+Microservice backend built with **.NET 10**, featuring a YARP API Gateway and a JWT-based Auth service following **Clean Architecture** and **CQRS**. A Product service is in progress.
 
 ![.NET](https://img.shields.io/badge/.NET-10-512BD4)
 ![Azure](https://img.shields.io/badge/Deployed%20on-Azure%20App%20Service-0078D4)
@@ -34,7 +34,11 @@ ServiceApplications/Auth
 ## Features
 
 - **JWT authentication** with configurable signing: HS256 or RS256
-- **Refresh tokens** with rotation, hashed storage (SHA-256), and **reuse detection** that revokes every active session for the user when a rotated token is replayed
+- **Refresh tokens** with rotation and SHA-256 hashed storage (raw tokens are never persisted)
+- **Single-session login**: each login revokes all previous refresh tokens for the user
+- **Reuse detection**: replaying a rotated refresh token revokes every active session for that user
+- **Race-safe rotation**: a conditional update ensures concurrent refresh requests with the same token produce only one new session
+- **Lockout-aware refresh**: locked-out users cannot refresh, and their sessions are revoked
 - **Role-based authorization** (Admin, Seller, Buyer); self-registration limited to Buyer and Seller
 - **CQRS with MediatR** and a **FluentValidation** pipeline behavior
 - **Centralized exception handling** returning RFC 7807 `ProblemDetails`, including JWT 401/403
@@ -53,7 +57,7 @@ ServiceApplications/Auth
 | Patterns | Clean Architecture, CQRS, MediatR, FluentValidation |
 | Orchestration | .NET Aspire |
 | Docs | OpenAPI, Swagger UI |
-| DevOps | GitHub Actions, Azure App Service, Docker |
+| DevOps | GitHub Actions, Azure App Service |
 
 ## Getting started
 
@@ -88,7 +92,7 @@ dotnet user-secrets set "Seed:Admin:Password" "<password>"
 
 For RS256, set `Jwt:SigningAlgorithm` to `RS256` and provide `Jwt:Rs256:PrivateKey` and `Jwt:Rs256:PublicKey` in PEM format.
 
-Update `ConnectionStrings:DefaultConnection` in `appsettings.json` if you're not using `localhost\SQLEXPRESS`.
+Update `ConnectionStrings:DefaultConnection` in `appsettings.json` if you're not using `localhost\SQLEXPRESS`. When hosted, the `DATABASE_URL` environment variable takes precedence.
 
 ### 3. Run
 
@@ -118,7 +122,10 @@ All routes below are shown through the gateway (`/auth-api` prefix).
 | POST | `/auth-api/api/Accounts/Register` | Public | Register a Buyer or Seller |
 | POST | `/auth-api/api/Accounts/Login` | Public | Get access and refresh tokens |
 | POST | `/auth-api/api/Accounts/Refresh` | Public | Rotate refresh token |
+| POST | `/auth-api/api/Accounts/Logout` | Public | Revoke a refresh token (idempotent) |
 | POST | `/auth-api/api/Roles/Create` | Admin | Create a role |
+
+> **Accounts are scoped by phone and role.** The same phone number can hold separate Buyer and Seller accounts, so login takes phone, role, and password.
 
 ### Register
 
@@ -168,6 +175,22 @@ Response:
 }
 ```
 
+Returns a new access token and a new refresh token. The old refresh token is revoked.
+
+### Logout
+
+```json
+{
+  "logoutRequest": {
+    "refreshToken": "q1w2e3r4..."
+  }
+}
+```
+
+Returns `204 No Content`, including when the token is already revoked or unknown.
+
+### Errors
+
 Errors are returned as `ProblemDetails`:
 
 ```json
@@ -178,15 +201,30 @@ Errors are returned as `ProblemDetails`:
 }
 ```
 
+## Token lifecycle
+
+| Event | Effect |
+|---|---|
+| Login | Issues a new token pair and revokes all existing refresh tokens for the user |
+| Refresh | Revokes the presented token, links it to its replacement, and issues a new pair |
+| Refresh with a rotated token | Treated as theft: all active sessions for the user are revoked |
+| Refresh with a token revoked by login/logout | Rejected with 401 |
+| Refresh by a locked-out user | Rejected and all sessions revoked |
+| Logout | Revokes the presented refresh token |
+
+Access tokens are short-lived (15 minutes by default) and stateless.
+
 ## Deployment
 
 Each service has its own GitHub Actions workflow in `.github/workflows/`. A push to `main` builds and deploys only the service whose files changed. Authentication to Azure uses OIDC federated credentials with a user-assigned managed identity.
 
 ## Roadmap
 
-- [ ] Product service
-- [ ] Logout endpoint
+- [x] Logout endpoint
 - [ ] Unit and integration tests
+- [ ] Rate limiting and lockout on failed logins
+- [ ] Admin lock/unlock and "log out all devices"
+- [ ] Product service
 - [ ] Docker Compose setup
 
 ## Author
