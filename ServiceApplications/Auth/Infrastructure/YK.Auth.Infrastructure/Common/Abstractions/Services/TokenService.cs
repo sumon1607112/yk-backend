@@ -27,11 +27,21 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             _db = db;
         }
 
+        /// <summary>
+        /// Issues a new token pair. Single-session: revokes all existing refresh tokens for the user.
+        /// Caller must validate credentials before calling.
+        /// </summary>
         public async Task<AuthTokensDto> GenerateTokensAsync(User user, CancellationToken ct = default)
         {
+            await using var tx = await _db.Database.BeginTransactionAsync(ct);
+
+            await RevokeAllActiveAsync(user.Id, ct);
+
             var (rawRefreshToken, entity) = CreateRefreshToken(user.Id);
             _db.RefreshTokens.Add(entity);
             await _db.SaveChangesAsync(ct);
+
+            await tx.CommitAsync(ct);
 
             return new AuthTokensDto
             {
@@ -45,16 +55,17 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             var hash = Hash(refreshToken);
 
             var stored = await _db.RefreshTokens
+                .AsNoTracking()
                 .Include(x => x.User)
                 .SingleOrDefaultAsync(x => x.TokenHash == hash, ct)
                 ?? throw new UnauthorizedException("Invalid refresh token.");
 
             if (stored.RevokedAt is not null)
             {
-                // A rotated token was reused: possible theft, so revoke every active token for this user
-                await _db.RefreshTokens
-                    .Where(x => x.UserId == stored.UserId && x.RevokedAt == null)
-                    .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, DateTime.UtcNow), ct);
+                // Revoked by rotation and reused -> possible theft, kill all sessions.
+                // Revoked by login/logout (ReplacedByTokenHash == null) -> just reject.
+                if (stored.ReplacedByTokenHash is not null)
+                    await RevokeAllActiveAsync(stored.UserId, ct);
 
                 throw new UnauthorizedException("Refresh token has been revoked.");
             }
@@ -62,13 +73,30 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             if (stored.ExpiresAt <= DateTime.UtcNow)
                 throw new UnauthorizedException("Refresh token has expired.");
 
+            if (await _userManager.IsLockedOutAsync(stored.User))
+            {
+                await RevokeAllActiveAsync(stored.UserId, ct);
+                throw new UnauthorizedException("User is locked out.");
+            }
+
             var (newRawToken, newEntity) = CreateRefreshToken(stored.UserId);
 
-            stored.RevokedAt = DateTime.UtcNow;
-            stored.ReplacedByTokenHash = newEntity.TokenHash;
+            await using var tx = await _db.Database.BeginTransactionAsync(ct);
+
+            // Conditional revoke guards against concurrent refresh with the same token
+            var revoked = await _db.RefreshTokens
+                .Where(x => x.Id == stored.Id && x.RevokedAt == null)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(x => x.RevokedAt, DateTime.UtcNow)
+                    .SetProperty(x => x.ReplacedByTokenHash, newEntity.TokenHash), ct);
+
+            if (revoked == 0)
+                throw new UnauthorizedException("Refresh token has been revoked.");
 
             _db.RefreshTokens.Add(newEntity);
             await _db.SaveChangesAsync(ct);
+
+            await tx.CommitAsync(ct);
 
             return new AuthTokensDto
             {
@@ -80,20 +108,24 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
         public async Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken ct = default)
         {
             var hash = Hash(refreshToken);
-            var stored = await _db.RefreshTokens.SingleOrDefaultAsync(x => x.TokenHash == hash, ct);
 
-            if (stored is null || !stored.IsActive) return; // idempotent logout
-
-            stored.RevokedAt = DateTime.UtcNow;
-            await _db.SaveChangesAsync(ct);
+            // Idempotent logout
+            await _db.RefreshTokens
+                .Where(x => x.TokenHash == hash && x.RevokedAt == null)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, DateTime.UtcNow), ct);
         }
 
         // ---------- helpers ----------
 
+        private Task<int> RevokeAllActiveAsync(string userId, CancellationToken ct) =>
+            _db.RefreshTokens
+                .Where(x => x.UserId == userId && x.RevokedAt == null)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, DateTime.UtcNow), ct);
+
         private (string Raw, RefreshToken Entity) CreateRefreshToken(string userId)
         {
             var days = _configuration.GetValue("Jwt:RefreshTokenDays", 7);
-            var raw = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            var raw = Base64UrlEncoder.Encode(RandomNumberGenerator.GetBytes(64));
             var now = DateTime.UtcNow;
 
             return (raw, new RefreshToken
@@ -106,7 +138,8 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
             });
         }
 
-        private static string Hash(string token) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+        private static string Hash(string token) =>
+            Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
         private async Task<string> CreateAccessTokenAsync(User user)
         {
@@ -122,7 +155,6 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
                             throw new InvalidOperationException("JWT secret key is not configured.");
 
                         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-
                         return WriteToken(claims, new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
                     }
                 case "RS256":
