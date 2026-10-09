@@ -33,15 +33,23 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
         /// </summary>
         public async Task<AuthTokensDto> GenerateTokensAsync(User user, CancellationToken ct = default)
         {
-            await using var tx = await _db.Database.BeginTransactionAsync(ct);
+            // Retry-enabled SQL Server requires user transactions to run inside the execution strategy
+            var strategy = _db.Database.CreateExecutionStrategy();
 
-            await RevokeAllActiveAsync(user.Id, ct);
+            var rawRefreshToken = await strategy.ExecuteAsync(async () =>
+            {
+                await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-            var (rawRefreshToken, entity) = CreateRefreshToken(user.Id);
-            _db.RefreshTokens.Add(entity);
-            await _db.SaveChangesAsync(ct);
+                await RevokeAllActiveAsync(user.Id, ct);
 
-            await tx.CommitAsync(ct);
+                // Created inside the lambda so a retry gets a fresh token
+                var (raw, entity) = CreateRefreshToken(user.Id);
+                _db.RefreshTokens.Add(entity);
+                await _db.SaveChangesAsync(ct);
+
+                await tx.CommitAsync(ct);
+                return raw;
+            });
 
             return new AuthTokensDto
             {
@@ -79,24 +87,30 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
                 throw new UnauthorizedException("User is locked out.");
             }
 
-            var (newRawToken, newEntity) = CreateRefreshToken(stored.UserId);
+            var strategy = _db.Database.CreateExecutionStrategy();
 
-            await using var tx = await _db.Database.BeginTransactionAsync(ct);
+            var newRawToken = await strategy.ExecuteAsync(async () =>
+            {
+                var (raw, newEntity) = CreateRefreshToken(stored.UserId);
 
-            // Conditional revoke guards against concurrent refresh with the same token
-            var revoked = await _db.RefreshTokens
-                .Where(x => x.Id == stored.Id && x.RevokedAt == null)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(x => x.RevokedAt, DateTime.UtcNow)
-                    .SetProperty(x => x.ReplacedByTokenHash, newEntity.TokenHash), ct);
+                await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-            if (revoked == 0)
-                throw new UnauthorizedException("Refresh token has been revoked.");
+                // Conditional revoke guards against concurrent refresh with the same token
+                var revoked = await _db.RefreshTokens
+                    .Where(x => x.Id == stored.Id && x.RevokedAt == null)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(x => x.RevokedAt, DateTime.UtcNow)
+                        .SetProperty(x => x.ReplacedByTokenHash, newEntity.TokenHash), ct);
 
-            _db.RefreshTokens.Add(newEntity);
-            await _db.SaveChangesAsync(ct);
+                if (revoked == 0)
+                    throw new UnauthorizedException("Refresh token has been revoked.");
 
-            await tx.CommitAsync(ct);
+                _db.RefreshTokens.Add(newEntity);
+                await _db.SaveChangesAsync(ct);
+
+                await tx.CommitAsync(ct);
+                return raw;
+            });
 
             return new AuthTokensDto
             {

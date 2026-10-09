@@ -30,9 +30,9 @@ namespace YK.Auth.WebAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<LoginResponseDto> Login(LoginCommand command, CancellationToken cancellationToken)
+        public async Task<LoginResponseDto> Login(LoginRequestDto request, CancellationToken cancellationToken)
         {
-            var response = await _mediator.Send(command, cancellationToken);
+            var response = await _mediator.Send<LoginResponseDto>(new LoginCommand(request), cancellationToken);
 
             return response;
         }
@@ -49,11 +49,9 @@ namespace YK.Auth.WebAPI.Controllers
 
         [AllowAnonymous]
         [HttpPost("Refresh")]
-        public async Task<AuthTokensDto> Refresh(RefreshTokenCommand command, CancellationToken ct)
+        public async Task<AuthTokensDto> Refresh(RefreshTokenRequestDto request, CancellationToken ct)
         {
-            var result = await _mediator.Send(command, ct);
-
-            return result;
+            return await _mediator.Send<AuthTokensDto>(new RefreshTokenCommand(request), ct);
         }
     }
 }
