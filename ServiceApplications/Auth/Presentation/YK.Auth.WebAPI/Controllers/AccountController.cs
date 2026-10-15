@@ -22,9 +22,9 @@ namespace YK.Auth.WebAPI.Controllers
 
         [HttpPost("Register")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> Register(RegisterCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register(RegisterRequestDto request, CancellationToken cancellationToken)
         {
-            await _mediator.Send(command, cancellationToken);
+            await _mediator.Send(new RegisterCommand(request), cancellationToken);
 
             return StatusCode(StatusCodes.Status201Created);
         }

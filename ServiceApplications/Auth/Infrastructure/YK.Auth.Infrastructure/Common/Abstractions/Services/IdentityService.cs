@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
 using YK.Auth.Application.Common.Contracts.Identity;
+using YK.Auth.Application.Common.Exceptions;
 using YK.Auth.Domain.Entities.Common.Identity;
 using YK.Auth.Infrastructure.Abstractions.Persistence.Contexts;
 
@@ -20,14 +21,9 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
 
         public async Task<bool> UserExistsAsync(string phone, string role)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phone);
+            var normalizedRole = _userManager.NormalizeName(role);
 
-            if (user is null)
-            {
-                return false;
-            }
-
-            return await _userManager.IsInRoleAsync(user, role);
+            return await UsersByPhoneAndRole(phone, role).AnyAsync();
         }
 
         public async Task<(bool Succeeded, IEnumerable<string> Errors)> CreateUserAsync(CreateUserRequest registerRequest)
@@ -62,21 +58,39 @@ namespace YK.Auth.Infrastructure.Common.Abstractions.Services
         {
             var normalizedRole = _userManager.NormalizeName(role);
 
-            var users = await (
-                from u in _context.Users
-                join ur in _context.UserRoles on u.Id equals ur.UserId
-                join r in _context.Roles on ur.RoleId equals r.Id
-                where u.PhoneNumber == phone && r.NormalizedName == normalizedRole
-                select u
-            ).ToListAsync();
+            // 1. Find the user by phone + role
+            var user = await UsersByPhoneAndRole(phone, role).FirstOrDefaultAsync();
 
-            foreach (var user in users)
+            if (user is null)
+                return null;
+
+            // 2. Locked? Reject even if the password is correct
+            if (await _userManager.IsLockedOutAsync(user))
+                throw new UnauthorizedException("Account is locked. Try again later.");
+
+            // 3. Wrong password? Count the failure
+            if (!await _userManager.CheckPasswordAsync(user, password))
             {
-                if (await _userManager.CheckPasswordAsync(user, password))
-                    return user;
+                await _userManager.AccessFailedAsync(user);
+                return null;
             }
 
-            return null;
+            // 4. Correct password: reset the failure count
+            await _userManager.ResetAccessFailedCountAsync(user);
+            return user;
+        }
+
+
+        //Helper method to get users by phone and role
+        private IQueryable<User> UsersByPhoneAndRole(string phone, string role)
+        {
+            var normalizedRole = _userManager.NormalizeName(role);
+
+            return from u in _context.Users
+                   join ur in _context.UserRoles on u.Id equals ur.UserId
+                   join r in _context.Roles on ur.RoleId equals r.Id
+                   where u.PhoneNumber == phone && r.NormalizedName == normalizedRole
+                   select u;
         }
     }
 }

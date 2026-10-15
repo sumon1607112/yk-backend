@@ -23,7 +23,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Login
                 throw new UnauthorizedException("Invalid phone, role, or password.");
             }
 
-            var tokens = await _tokenService.GenerateTokensAsync(user);
+            var tokens = await _tokenService.GenerateTokensAsync(user, cancellationToken);
 
             return new LoginResponseDto
             {
