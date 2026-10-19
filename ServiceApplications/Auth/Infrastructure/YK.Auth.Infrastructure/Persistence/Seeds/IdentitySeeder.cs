@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using YK.Auth.Domain.Entities.Common.Identity;
 using YK.Auth.Domain.Enums;
 
-namespace YK.Auth.Infrastructure.Abstractions.Persistence.Seeds
+namespace YK.Auth.Infrastructure.Persistence.Seeds
 {
     public static class IdentitySeeder
     {

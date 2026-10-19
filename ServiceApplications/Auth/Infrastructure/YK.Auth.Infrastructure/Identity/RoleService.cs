@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
 
-namespace YK.Auth.Infrastructure.Common.Abstractions.Services
+namespace YK.Auth.Infrastructure.Identity
 {
     public class RoleService : IRoleService
     {

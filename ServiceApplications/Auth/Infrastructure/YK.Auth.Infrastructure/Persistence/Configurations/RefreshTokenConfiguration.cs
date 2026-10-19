@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YK.Auth.Domain.Entities.Common.Identity;
 
-namespace YK.Auth.Infrastructure.Abstractions.Persistence.Configurations
+namespace YK.Auth.Infrastructure.Persistence.Configurations
 {
     public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     {

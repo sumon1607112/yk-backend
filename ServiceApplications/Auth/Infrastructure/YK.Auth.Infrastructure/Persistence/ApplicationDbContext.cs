@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using YK.Auth.Domain.Entities.Common.Identity;
 
-namespace YK.Auth.Infrastructure.Abstractions.Persistence.Contexts
+namespace YK.Auth.Infrastructure.Persistence
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -10,9 +10,9 @@ using YK.Auth.Application.Common.Abstractions.Services.Identity;
 using YK.Auth.Application.Common.Contracts.Authentication;
 using YK.Auth.Application.Common.Exceptions;
 using YK.Auth.Domain.Entities.Common.Identity;
-using YK.Auth.Infrastructure.Abstractions.Persistence.Contexts;
+using YK.Auth.Infrastructure.Persistence;
 
-namespace YK.Auth.Infrastructure.Common.Abstractions.Services
+namespace YK.Auth.Infrastructure.Identity
 {
     public class TokenService : ITokenService
     {
