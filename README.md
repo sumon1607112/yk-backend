@@ -38,6 +38,7 @@ ServiceApplications/Auth
 - **Single-session login**: each login revokes all previous refresh tokens for the user
 - **Reuse detection**: replaying a rotated refresh token revokes every active session for that user
 - **Race-safe rotation**: a conditional update ensures concurrent refresh requests with the same token produce only one new session
+- **Account lockout**: 5 failed logins lock the account for 15 minutes
 - **Lockout-aware refresh**: locked-out users cannot refresh, and their sessions are revoked
 - **Role-based authorization** (Admin, Seller, Buyer); self-registration limited to Buyer and Seller
 - **CQRS with MediatR** and a **FluentValidation** pipeline behavior
@@ -131,13 +132,11 @@ All routes below are shown through the gateway (`/auth-api` prefix).
 
 ```json
 {
-  "registerRequest": {
-    "createUserRequest": {
-      "phone": "01700000000",
-      "email": "user@example.com",
-      "password": "Passw0rd!",
-      "role": "Buyer"
-    }
+  "createUserRequest": {
+    "phone": "01700000000",
+    "email": "user@example.com",
+    "password": "Passw0rd!",
+    "role": "Buyer"
   }
 }
 ```
@@ -146,11 +145,9 @@ All routes below are shown through the gateway (`/auth-api` prefix).
 
 ```json
 {
-  "loginRequest": {
-    "phone": "01700000000",
-    "role": "Buyer",
-    "password": "Passw0rd!"
-  }
+  "phone": "01700000000",
+  "role": "Buyer",
+  "password": "Passw0rd!"
 }
 ```
 
@@ -169,9 +166,7 @@ Response:
 
 ```json
 {
-  "refreshTokenRequest": {
-    "refreshToken": "q1w2e3r4..."
-  }
+  "refreshToken": "q1w2e3r4..."
 }
 ```
 
@@ -181,9 +176,7 @@ Returns a new access token and a new refresh token. The old refresh token is rev
 
 ```json
 {
-  "logoutRequest": {
-    "refreshToken": "q1w2e3r4..."
-  }
+  "refreshToken": "q1w2e3r4..."
 }
 ```
 
@@ -222,7 +215,8 @@ Each service has its own GitHub Actions workflow in `.github/workflows/`. A push
 
 - [x] Logout endpoint
 - [ ] Unit and integration tests
-- [ ] Rate limiting and lockout on failed logins
+- [x] Account lockout on failed logins
+- [ ] Rate limiting on login
 - [ ] Admin lock/unlock and "log out all devices"
 - [ ] Product service
 - [ ] Docker Compose setup
