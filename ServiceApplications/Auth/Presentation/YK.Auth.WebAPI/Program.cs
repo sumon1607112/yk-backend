@@ -9,16 +9,9 @@ using YK.Auth.WebAPI.Common.Middlewares;
 using YK.Auth.WebAPI.Common.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 builder.AddServiceDefaults();
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod());
-});
-
 builder.Services.AddControllers();
 builder.Services.AddOpenApi(options =>
 {
@@ -38,12 +31,15 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.MapDefaultEndpoints();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseCors();
-app.MapOpenApi();
-app.UseSwaggerUI(options =>
+// Swagger: always on in Development; in other environments only when Swagger:Enabled = true
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"))
 {
-    options.SwaggerEndpoint("/openapi/v1.json", "v1");
-});
+    app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
