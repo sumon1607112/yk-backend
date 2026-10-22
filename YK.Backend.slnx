@@ -18,6 +18,9 @@
   <Folder Name="/ServiceApplications/Auth/Presentation/">
     <Project Path="ServiceApplications/Auth/Presentation/YK.Auth.WebAPI/YK.Auth.WebAPI.csproj" Id="9c104c57-1267-481d-9cf8-36e45f0e7cd2" />
   </Folder>
+  <Folder Name="/ServiceApplications/Auth/Tests/">
+    <Project Path="ServiceApplications/Auth/Tests/YK.Auth.Infrastructure.Tests/YK.Auth.Infrastructure.Tests.csproj" />
+  </Folder>
   <Folder Name="/ServiceApplications/Product/" />
   <Folder Name="/Solution Items/">
     <File Path=".dockerignore" />
