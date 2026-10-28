@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
+using YK.Auth.Application.Common.Abstractions.Services.Phone;
 using YK.Auth.Application.Common.Exceptions;
 
 namespace YK.Auth.Application.UseCases.Account.Commands.Login
@@ -7,18 +8,26 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Login
     public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDto>
     {
         private readonly IIdentityService _identityService;
+        private readonly IPhoneNumberService _phoneNumberService;
         private readonly ITokenService _tokenService;
 
-        public LoginCommandHandler(IIdentityService identityService, ITokenService tokenService)
+        public LoginCommandHandler(IIdentityService identityService, IPhoneNumberService phoneNumberService, ITokenService tokenService)
         {
             _identityService = identityService;
+            _phoneNumberService = phoneNumberService;
             _tokenService = tokenService;
         }
 
         public async Task<LoginResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            var user = await _identityService.ValidateCredentialsAsync(request.loginRequest.Phone, request.loginRequest.Role, request.loginRequest.Password);
-            if (user == null)
+            if (!_phoneNumberService.TryNormalize(request.loginRequest.Phone, out var normalizedPhone))
+            {
+                throw new InvalidOperationException("Phone number passed validation but could not be normalized.");
+            }
+
+            var user = await _identityService.ValidateCredentialsAsync(normalizedPhone, request.loginRequest.Role, request.loginRequest.Password);
+
+            if (user is null)
             {
                 throw new UnauthorizedException("Invalid phone, role, or password.");
             }
