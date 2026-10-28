@@ -15,7 +15,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Register
             _roleService = roleService;
         }
 
-        public async Task Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task Handle(RegisterCommand request, CancellationToken ct)
         {
             var createUserRequest = request.registerRequest.CreateUserRequest;
 
@@ -32,12 +32,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Register
                 throw new NotFoundException("The specified role does not exist.");
             }
 
-            var result = await _identityService.CreateUserAsync(createUserRequest);
-
-            if (!result.Succeeded)
-            {
-                throw new BusinessRuleException(result.Errors);
-            }
+            await _identityService.CreateUserAsync(createUserRequest, ct);
         }
     }
 }

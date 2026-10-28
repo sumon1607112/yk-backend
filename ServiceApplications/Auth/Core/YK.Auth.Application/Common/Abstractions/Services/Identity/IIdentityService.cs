@@ -7,7 +7,7 @@ namespace YK.Auth.Application.Common.Abstractions.Services.Identity
     {
         Task<bool> UserExistsAsync(string phone, string role);
 
-        Task<(bool Succeeded, IEnumerable<string> Errors)> CreateUserAsync(CreateUserRequest registerRequest);
+        Task CreateUserAsync(CreateUserRequest request, CancellationToken ct = default);
 
         Task<User?> ValidateCredentialsAsync(string phone, string role, string password);
     }

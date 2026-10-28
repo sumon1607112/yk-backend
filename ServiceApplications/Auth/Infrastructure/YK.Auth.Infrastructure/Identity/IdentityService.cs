@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
 using YK.Auth.Application.Common.Contracts.Identity;
@@ -10,13 +11,13 @@ namespace YK.Auth.Infrastructure.Identity
 {
     public class IdentityService : IIdentityService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _dbContext;
         private readonly UserManager<User> _userManager;
 
         public IdentityService(UserManager<User> userManager, ApplicationDbContext context)
         {
             _userManager = userManager;
-            _context = context;
+            _dbContext = context;
         }
 
         public async Task<bool> UserExistsAsync(string phone, string role)
@@ -26,32 +27,54 @@ namespace YK.Auth.Infrastructure.Identity
             return await UsersByPhoneAndRole(phone, role).AnyAsync();
         }
 
-        public async Task<(bool Succeeded, IEnumerable<string> Errors)> CreateUserAsync(CreateUserRequest registerRequest)
+        public async Task CreateUserAsync(CreateUserRequest request, CancellationToken ct = default)
         {
-            var user = new User
+            try
             {
-                UserName = Guid.NewGuid().ToString(),
-                PhoneNumber = registerRequest.Phone,
-                Email = registerRequest.Email
-            };
+                var strategy = _dbContext.Database.CreateExecutionStrategy();
 
-            var userResult = await _userManager.CreateAsync(user, registerRequest.Password);
+                await strategy.ExecuteAsync(async () =>
+                {
+                    _dbContext.ChangeTracker.Clear();
 
-            if (!userResult.Succeeded)
+                    await using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
+
+                    var user = new User
+                    {
+                        PhoneNumber = request.Phone,
+                        Email = request.Email,
+                        UserName = AccountUserName.Create(request.Phone, request.Role)
+                    };
+
+                    var userResult = await _userManager.CreateAsync(user, request.Password);
+
+                    if (!userResult.Succeeded)
+                    {
+                        var errors = userResult.Errors.ToList();
+
+                        if (errors.Any(e => e.Code == nameof(IdentityErrorDescriber.DuplicateUserName)))
+                        {
+                            throw new ConflictException("A user with this phone number and role already exists.");
+                        }
+
+                        throw new BusinessRuleException(errors.Select(e => e.Description).ToList());
+                    }
+
+                    var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
+
+                    if (!roleResult.Succeeded)
+                    {
+                        throw new BusinessRuleException(roleResult.Errors.Select(e => e.Description).ToList());
+                    }
+
+                    await transaction.CommitAsync(ct);
+                });
+            }
+            catch (DbUpdateException ex) when (IsUniqueViolation(ex))
             {
-                return (false, userResult.Errors.Select(x => x.Description));
+                throw new ConflictException("A user with this phone number and role already exists.");
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, registerRequest.Role);
-
-            if (!roleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(user);
-
-                return (false, roleResult.Errors.Select(x => x.Description));
-            }
-
-            return (true, []);
         }
 
         public async Task<User?> ValidateCredentialsAsync(string phone, string role, string password)
@@ -86,11 +109,13 @@ namespace YK.Auth.Infrastructure.Identity
         {
             var normalizedRole = _userManager.NormalizeName(role);
 
-            return from u in _context.Users
-                   join ur in _context.UserRoles on u.Id equals ur.UserId
-                   join r in _context.Roles on ur.RoleId equals r.Id
+            return from u in _dbContext.Users
+                   join ur in _dbContext.UserRoles on u.Id equals ur.UserId
+                   join r in _dbContext.Roles on ur.RoleId equals r.Id
                    where u.PhoneNumber == phone && r.NormalizedName == normalizedRole
                    select u;
         }
+
+        private static bool IsUniqueViolation(DbUpdateException ex) => ex.InnerException is SqlException { Number: 2601 or 2627 };
     }
 }
