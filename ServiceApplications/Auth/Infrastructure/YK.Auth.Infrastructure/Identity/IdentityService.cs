@@ -22,9 +22,9 @@ namespace YK.Auth.Infrastructure.Identity
 
         public async Task<bool> UserExistsAsync(string phone, string role)
         {
-            var normalizedRole = _userManager.NormalizeName(role);
+            var userName = AccountUserName.Create(phone, role);
 
-            return await UsersByPhoneAndRole(phone, role).AnyAsync();
+            return await _userManager.FindByNameAsync(userName) is not null;
         }
 
         public async Task CreateUserAsync(CreateUserRequest request, CancellationToken ct = default)
@@ -79,17 +79,17 @@ namespace YK.Auth.Infrastructure.Identity
 
         public async Task<User?> ValidateCredentialsAsync(string phone, string role, string password)
         {
-            var normalizedRole = _userManager.NormalizeName(role);
+            var userName = AccountUserName.Create(phone, role);
 
             // 1. Find the user by phone + role
-            var user = await UsersByPhoneAndRole(phone, role).FirstOrDefaultAsync();
+            var user = await _userManager.FindByNameAsync(userName);
 
             if (user is null)
                 return null;
 
             // 2. Locked? Reject even if the password is correct
             if (await _userManager.IsLockedOutAsync(user))
-                throw new UnauthorizedException("Account is locked. Try again later.");
+                return null;
 
             // 3. Wrong password? Count the failure
             if (!await _userManager.CheckPasswordAsync(user, password))
@@ -101,19 +101,6 @@ namespace YK.Auth.Infrastructure.Identity
             // 4. Correct password: reset the failure count
             await _userManager.ResetAccessFailedCountAsync(user);
             return user;
-        }
-
-
-        //Helper method to get users by phone and role
-        private IQueryable<User> UsersByPhoneAndRole(string phone, string role)
-        {
-            var normalizedRole = _userManager.NormalizeName(role);
-
-            return from u in _dbContext.Users
-                   join ur in _dbContext.UserRoles on u.Id equals ur.UserId
-                   join r in _dbContext.Roles on ur.RoleId equals r.Id
-                   where u.PhoneNumber == phone && r.NormalizedName == normalizedRole
-                   select u;
         }
 
         private static bool IsUniqueViolation(DbUpdateException ex) => ex.InnerException is SqlException { Number: 2601 or 2627 };
