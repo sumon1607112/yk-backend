@@ -20,11 +20,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Login
 
         public async Task<LoginResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            if (!_phoneNumberService.TryNormalize(request.loginRequest.Phone, out var normalizedPhone))
-            {
-                throw new InvalidOperationException("Phone number passed validation but could not be normalized.");
-            }
-
+            var normalizedPhone = PhoneNumberServiceExtensions.NormalizeOrThrow(_phoneNumberService, request.loginRequest.Phone, "Phone number passed validation but could not be normalized.");
             var user = await _identityService.ValidateCredentialsAsync(normalizedPhone, request.loginRequest.Role, request.loginRequest.Password);
 
             if (user is null)
