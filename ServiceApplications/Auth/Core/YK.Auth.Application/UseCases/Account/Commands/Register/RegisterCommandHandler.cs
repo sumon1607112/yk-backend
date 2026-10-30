@@ -22,7 +22,7 @@ namespace YK.Auth.Application.UseCases.Account.Commands.Register
         public async Task Handle(RegisterCommand request, CancellationToken ct)
         {
             var createUserRequest = request.registerRequest.CreateUserRequest;
-            var normalizedPhone = PhoneNumberServiceExtensions.NormalizeOrThrow(_phoneNumberService, createUserRequest.Phone, "Phone number passed validation but could not be normalized.");
+            var normalizedPhone = _phoneNumberService.NormalizeOrThrow(createUserRequest.Phone);
 
             var userExist = await _identityService.UserExistsAsync(normalizedPhone, createUserRequest.Role);
             var roleExist = await _roleService.RoleExistsAsync(createUserRequest.Role);
