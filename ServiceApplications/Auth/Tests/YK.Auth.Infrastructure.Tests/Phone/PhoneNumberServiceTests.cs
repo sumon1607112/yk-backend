@@ -15,6 +15,7 @@ namespace YK.Auth.Infrastructure.Tests.Phone
         public void TryNormalize_ValidBdMobile_ReturnsE164(string input, string expected)
         {
             var sut = CreateSut();
+
             var result = sut.TryNormalize(input, out var e164);
 
             Assert.True(result);
@@ -28,9 +29,11 @@ namespace YK.Auth.Infrastructure.Tests.Phone
         [InlineData("1234567890")]
         [InlineData("+919876543210")]
         [InlineData("02-9561234")]
+        [InlineData("abc")]
         public void TryNormalize_InvalidInput_ReturnsFalse(string? input)
         {
             var sut = CreateSut();
+
             var result = sut.TryNormalize(input, out var e164);
 
             Assert.False(result);
