@@ -12,6 +12,7 @@ on:
 
 env:
   PROJECT_PATH: ServiceApplications/Auth/Presentation/YK.Auth.WebAPI/YK.Auth.WebAPI.csproj
+  TEST_PROJECT_PATH: ServiceApplications/Auth/Tests/YK.Auth.Infrastructure.Tests/YK.Auth.Infrastructure.Tests.csproj
   PUBLISH_DIR: ./publish
 
 jobs:
@@ -34,6 +35,9 @@ jobs:
 
       - name: Build
         run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test "${{ env.TEST_PROJECT_PATH }}" --configuration Release
 
       - name: Publish
         run: dotnet publish "${{ env.PROJECT_PATH }}" --configuration Release --no-build --output "${{ env.PUBLISH_DIR }}"
