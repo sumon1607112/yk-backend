@@ -2,10 +2,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PhoneNumbers;
 using YK.Auth.Application.Common.Abstractions.Services.Identity;
+using YK.Auth.Application.Common.Abstractions.Services.Phone;
 using YK.Auth.Domain.Entities.Common.Identity;
-using YK.Auth.Infrastructure.Persistence;
 using YK.Auth.Infrastructure.Identity;
+using YK.Auth.Infrastructure.Persistence;
+using YK.Auth.Infrastructure.Phone;
 
 namespace YK.Auth.Infrastructure
 {
@@ -50,6 +53,15 @@ namespace YK.Auth.Infrastructure
              .AddRoles<IdentityRole>()
              .AddEntityFrameworkStores<ApplicationDbContext>()
              .AddDefaultTokenProviders();
+
+            services.AddOptions<PhoneNumberOptions>()
+                    .Bind(configuration.GetSection(PhoneNumberOptions.SectionName))
+                    .Validate(o => o.AllowedRegions.Length > 0, "PhoneNumber:AllowedRegions must not be empty.")
+                    .ValidateOnStart();
+
+            services.AddSingleton(PhoneNumberUtil.GetInstance());
+            services.AddSingleton<IPhoneNumberService, PhoneNumberService>();
+
             // Services
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IRoleService, RoleService>();
