@@ -32,6 +32,7 @@ namespace YK.Auth.Infrastructure.Tests.Phone
         {
             var sut = CreateSut();
             var result = sut.TryNormalize(input, out var e164);
+
             Assert.False(result);
             Assert.Null(e164);
         }
