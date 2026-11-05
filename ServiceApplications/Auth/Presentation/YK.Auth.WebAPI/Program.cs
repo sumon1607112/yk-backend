@@ -45,31 +45,21 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// NEW: apply migrations and seed roles/admin on startup (retry if the DB is still waking up)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-    const int maxAttempts = 6;
-    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    try
     {
-        try
-        {
-            await db.Database.MigrateAsync();
-            await IdentitySeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
-            logger.LogInformation("Database migrated and seeded.");
-            break;
-        }
-        catch (Exception ex) when (attempt < maxAttempts)
-        {
-            logger.LogWarning(ex, "Database not ready (attempt {Attempt}/{Max}). Retrying in 10s...", attempt, maxAttempts);
-            await Task.Delay(TimeSpan.FromSeconds(10));
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Database migration/seed failed after {Max} attempts.", maxAttempts);
-        }
+        await db.Database.MigrateAsync();
+        await IdentitySeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+        logger.LogInformation("Database migrated and seeded.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(ex, "Failed to migrate or seed the database.");
+        throw;
     }
 }
 
