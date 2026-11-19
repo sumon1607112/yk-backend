@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using Yarp.ReverseProxy.Transforms;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
@@ -18,8 +19,25 @@ builder.Services.AddCors(options =>
     });
 });
 
+var authKey = builder.Configuration["Services:Auth:GatewayKey"];
+// Must match GatewayKeyMiddleware.HeaderName in the Auth service
+const string GatewayKeyHeader = "X-Gateway-Key";
+
+if (string.IsNullOrWhiteSpace(authKey) || authKey.Length < 32)
+{
+    throw new InvalidOperationException("Services:Auth:GatewayKey must be configured and at least 32 characters long.");
+}
+
+
 builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
+    .AddTransforms(context =>
+    {
+        if (context.Route.ClusterId == "auth-cluster")
+        {
+            context.AddRequestHeader(GatewayKeyHeader, authKey, append: false);
+        }
+    });
 
 builder.Services.AddOpenApi();
 
