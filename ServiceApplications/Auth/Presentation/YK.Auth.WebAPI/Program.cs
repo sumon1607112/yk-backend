@@ -40,6 +40,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.MapDefaultEndpoints();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<GatewayKeyMiddleware>();
 // Swagger: always on in Development; in other environments only when Swagger:Enabled = true
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"))
 {
